@@ -3,11 +3,11 @@
 import { revalidatePath } from "next/cache";
 
 import { connectToDB } from "../mongoose";
-
+import { triggerAi } from "./ai.actions";
 import User from "../models/user.model";
 import Thread from "../models/thread.model";
 import Community from "../models/community.model";
-
+//import axios from "axios";
 export async function fetchPosts(pageNumber = 1, pageSize = 20) {
   connectToDB();
 
@@ -231,6 +231,20 @@ export async function addCommentToThread(
 
     // Save the updated original thread to the database
     await originalThread.save();
+
+
+    //add call to DJANGO API
+    //console.log("userId: ", userId);
+    //console.log("Original Author:", originalThread.author);
+    //axios.post('http://127.0.0.1:8000/api/v1/accounts/posted/', {
+    //    webId: originalThread.author,
+    //  }).catch(error => {
+    //  console.error('Error triggering external API:', error);
+    //  });
+    // call the ai action for the comment
+    triggerAi("comment", savedCommentThread._id);
+
+
 
     revalidatePath(path);
   } catch (err) {
